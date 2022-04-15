@@ -4,9 +4,9 @@ import os
 
 # new folder path (may need to alter for Windows OS)
 # change path to your path
-ORI_PATH = 'C:/Users/tanuj/Desktop/Leaf_Images_Dataset/leaf_dataset/Gauva/'
+ORI_PATH = 'C:/Users/tanuj/Desktop/Leaf_Images_Dataset/leaf_dataset/Pongamia Pinnata/'
 NEW_SIZE = 300
-PATH = 'C:/Users/tanuj/Desktop/resized_leaf_img_dataset/Gauva' #the path where to save resized images
+PATH = 'C:/Users/tanuj/Desktop/resized_leaf_img_dataset/Pongamia Pinnata' #the path where to save resized images
 
 # create new folder
 if not os.path.exists(PATH):
