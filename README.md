@@ -9,3 +9,15 @@
 - Step 5: Setup Realtime database with closest server location and start in test mode
 - Step 6: Enable storage private
 
+## Virtual Environment to develop in
+```
+pip install virtualenv
+```
+
+```
+virtualenv plantbay
+```
+
+```
+virtual .\plantbay\Scripts\activate
+```

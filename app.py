@@ -1,156 +1,103 @@
+# Imporiting Necessary Libraries
 import streamlit as st
-import numpy as np
-import pandas as pd
-import keras
-from keras.utils.np_utils import to_categorical
-from keras.models import Sequential, load_model
-from keras import backend as K
-import os
-import time
-import io
 from PIL import Image
-import plotly.express as px
+import io
+import numpy as np
+import tensorflow as tf
+from utils import clean_image, get_prediction, make_results
+
+# Loading the Model and saving to cache
+@st.cache(allow_output_mutation=True)
+def load_model(path):
+    
+    # Xception Model
+    xception_model = tf.keras.models.Sequential([
+    tf.keras.applications.xception.Xception(include_top=False, weights='imagenet', input_shape=(512, 512, 3)),
+    tf.keras.layers.GlobalAveragePooling2D(),
+    tf.keras.layers.Dense(4,activation='softmax')
+    ])
 
 
-MODELSPATH = './models/'
-DATAPATH = './data/'
+    # DenseNet Model
+    densenet_model = tf.keras.models.Sequential([
+        tf.keras.applications.densenet.DenseNet121(include_top=False, weights='imagenet',input_shape=(512, 512, 3)),
+    tf.keras.layers.GlobalAveragePooling2D(),
+    tf.keras.layers.Dense(4,activation='softmax')
+    ])
+
+    # Ensembling the Models
+    inputs = tf.keras.Input(shape=(512, 512, 3))
+
+    xception_output = xception_model(inputs)
+    densenet_output = densenet_model(inputs)
+
+    outputs = tf.keras.layers.average([densenet_output, xception_output])
 
 
-st.set_page_config(page_title='Plant Bay')  
-@st.cache
-def load_mekd():
-    img = Image.open(DATAPATH + '/ISIC_0024312.jpg')
-    return img
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
-
-@st.cache
-def data_gen(x):
-    img = np.asarray(Image.open(x).resize((100, 75)))
-    x_test = np.asarray(img.tolist())
-    x_test_mean = np.mean(x_test)
-    x_test_std = np.std(x_test)
-    x_test = (x_test - x_test_mean) / x_test_std
-    x_validate = x_test.reshape(1, 224, 224, 3)
-
-    return x_validate
-
-
-@st.cache
-def data_gen_(img):
-    img = img.reshape(100, 75)
-    x_test = np.asarray(img.tolist())
-    x_test_mean = np.mean(x_test)
-    x_test_std = np.std(x_test)
-    x_test = (x_test - x_test_mean) / x_test_std
-    x_validate = x_test.reshape(1, 224, 224, 3)
-
-    return x_validate
-
-
-def load_models():
-
-    model = load_model(MODELSPATH + 'trained_model_ia.h5')
+    # Loading the Weights of Model
+    model.load_weights(path)
+    
     return model
 
 
-@st.cache
-def predict(x_test, model):
-    Y_pred = model.predict(x_test)
-    ynew = model.predict(x_test)
-    K.clear_session()
-    ynew = np.round(ynew, 2)
-    ynew = ynew*100
-    y_new = ynew[0].tolist()
-    Y_pred_classes = np.argmax(Y_pred, axis=1)
-    K.clear_session()
-    return y_new, Y_pred_classes
+# Removing Menu
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+# Title and Description
+st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
+st.write('Welcome to PlantBay!', 'Your Personal Plant Assistant!')
+
+# Loading the Model
+model = load_model('model_final.h5')
 
 
-@st.cache
-def display_prediction(y_new):
-    """Display image and preditions from model"""
-
-    result = pd.DataFrame({'Probability': y_new}, index=np.arange(7))
-    result = result.reset_index()
-    result.columns = ['Classes', 'Probability']
-    lesion_type_dict = {2: 'Benign keratosis-like lesions', 4: 'Melanocytic nevi', 3: 'Dermatofibroma',
-                        5: 'Melanoma', 6: 'Vascular lesions', 1: 'Basal cell carcinoma', 0: 'Actinic keratoses'}
-    result["Classes"] = result["Classes"].map(lesion_type_dict)
-    return result
-
-
-def main():
-    st.sidebar.header('Skin Cancer Analysis Image Recognition')
-    st.sidebar.subheader('B4H Team Z3R0')
-    st.sidebar.subheader('Made By: Tanuj Dargan')    
-      
-                
 option = st.selectbox(
      'How would you like to detect a disease?',
      ('Camera', 'Upload an Image'))
 if option == 'Camera':
-    picture = st.camera_input("Take a picture")
-    
-    if picture:
-        x_test = data_gen(picture)
-        image = Image.open(picture)
-        img_array = np.array(image)
+    uploaded_file = st.camera_input("Take a picture")
+    if uploaded_file != None:
         st.success('File Upload Success!!')
-        if st.button('Run Image Recognition'):
-            import time
+elif option == 'Upload an Image':    
+    uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg"])
 
-            my_bar = st.progress(0)
-
-            for percent_complete in range(100):
-                my_bar.progress(percent_complete + 1)
-            st.image(picture)
-            st.subheader("Loading Algorithm!")
-            model = load_models()
-            st.success("Hooray !! Keras Model Loaded!")
-            st.subheader("Prediction Probability for Uploaded Image")
-            y_new, Y_pred_classes = predict(x_test, model)
-            result = display_prediction(y_new)
-            st.write(result)
-            st.subheader("Probability Graph")
-            fig = px.bar(result, x="Classes",
-            y="Probability", color='Classes')
-            st.plotly_chart(fig, use_container_width=True)
-
+if uploaded_file != None:
     
-else:
-    file_path = st.file_uploader('Upload an image', type=['png', 'jpg'])
-    if file_path is not None:
-            x_test = data_gen(file_path)
-            image = Image.open(file_path)
-            img_array = np.array(image)
-
-            st.success('File Upload Success!!')
-            if st.button('Run Image Recognition'):
-                import time
-                my_bar = st.progress(0)
-                for percent_complete in range(100):
-                    my_bar.progress(percent_complete + 1)
-                st.info("Showing Uploaded Image ---->>>")
-                st.image(img_array, caption='Uploaded Image',
-                     use_column_width=True)
-                st.subheader("Loading Algorithm!")
-                model = load_models()
-                st.success("Hooray !! Keras Model Loaded!")
-                st.subheader("Prediction Probability for Uploaded Image")
-                y_new, Y_pred_classes = predict(x_test, model)
-                result = display_prediction(y_new)
-                st.write(result)
-                st.subheader("Probability Graph")
-                fig = px.bar(result, x="Classes",
-                y="Probability", color='Classes')
-                st.plotly_chart(fig, use_container_width=True)
-        
-            else:
-                 st.info("Click the button to continue")
-    else:
-            st.info('Please upload Image file')
-
+    # Display progress and text
+    progress = st.text("Crunching Image")
+    my_bar = st.progress(0)
+    i = 0
     
-
-if __name__ == "__main__":
-    main()
+    # Reading the uploaded image
+    image = Image.open(io.BytesIO(uploaded_file.read()))
+    st.image(np.array(Image.fromarray(
+        np.array(image)).resize((700, 400), Image.ANTIALIAS)), width=None)
+    my_bar.progress(i + 40)
+    
+    # Cleaning the image
+    image = clean_image(image)
+    
+    # Making the predictions
+    predictions, predictions_arr = get_prediction(model, image)
+    my_bar.progress(i + 30)
+    
+    # Making the results
+    result = make_results(predictions, predictions_arr)
+    
+    # Removing progress bar and text after prediction done
+    my_bar.progress(i + 30)
+    progress.empty()
+    i = 0
+    my_bar.empty()
+    
+    # Show the results
+    st.subheader(f"The plant{result['status']} with {result['prediction']} probability.")
+    
