@@ -5,7 +5,7 @@ import io
 import numpy as np
 import tensorflow as tf
 from utils import clean_image, get_prediction, make_results
-st.set_page_config(page_title='Platbay', page_icon = 'https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/pglogo.png?token=GHSAT0AAAAAABSBHTQMEMAEQLLDUIPFNMIAYWPLT7A')
+st.set_page_config(page_title='Plantbay', page_icon = 'https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/pglogo.png?token=GHSAT0AAAAAABSBHTQMEMAEQLLDUIPFNMIAYWPLT7A')
 
 # Loading the Model and saving to cache
 @st.cache(allow_output_mutation=True)
