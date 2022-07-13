@@ -56,7 +56,7 @@ st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/pla
 st.write('Welcome to PlantBay!', 'Your Personal Plant Assistant!')
 
 # Loading the Model
-model = load_model('model_final.h5')
+model = load_model('https://firebasestorage.googleapis.com/v0/b/plantbay-de191.appspot.com/o/model_final.h5')
 
 
 option = st.selectbox(
