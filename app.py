@@ -5,6 +5,7 @@ import io
 import numpy as np
 import tensorflow as tf
 from utils import clean_image, get_prediction, make_results
+st.set_page_config(page_title='Platbay', page_icon = 'https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/pglogo.png?token=GHSAT0AAAAAABSBHTQMEMAEQLLDUIPFNMIAYWPLT7A')
 
 # Loading the Model and saving to cache
 @st.cache(allow_output_mutation=True)
@@ -52,11 +53,11 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
 # Title and Description
-st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
+st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQMSKUYWFZCOP2VQSI4YWPLUKA')
 st.write('Welcome to PlantBay!', 'Your Personal Plant Assistant!')
 
 # Loading the Model
-model = load_model('https://firebasestorage.googleapis.com/v0/b/plantbay-de191.appspot.com/o/model_final.h5')
+model = load_model('https://firebasestorage.googleapis.com/v0/b/plantbay-de191.appspot.com/o/model_final.h5?alt=media&token=3ef2bbe1-7b35-44c4-8568-6b2e8173ee6e')
 
 
 option = st.selectbox(
