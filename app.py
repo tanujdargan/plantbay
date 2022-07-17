@@ -141,7 +141,7 @@ def login():
     import pyrebase
     import streamlit as st
     from datetime import datetime
-    from utils import firebaseConfig
+
 
     #st.set_page_config(page_title='Login', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/login-icon.png")
 
