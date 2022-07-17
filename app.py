@@ -1,104 +1,202 @@
-# Imporiting Necessary Libraries
 import streamlit as st
-from PIL import Image
-import io
-import numpy as np
-import tensorflow as tf
-from utils import clean_image, get_prediction, make_results
-st.set_page_config(page_title='Plantbay', page_icon = 'https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/pglogo.png?token=GHSAT0AAAAAABSBHTQMEMAEQLLDUIPFNMIAYWPLT7A')
+import pyrebase
+import streamlit as st
+from datetime import datetime
+from utils import firebaseConfig
+# Firebase Authentication
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
 
-# Loading the Model and saving to cache
-@st.cache(allow_output_mutation=True)
-def load_model(path):
-    
-    # Xception Model
-    xception_model = tf.keras.models.Sequential([
-    tf.keras.applications.xception.Xception(include_top=False, weights='imagenet', input_shape=(512, 512, 3)),
-    tf.keras.layers.GlobalAveragePooling2D(),
-    tf.keras.layers.Dense(4,activation='softmax')
-    ])
+# Database
+db = firebase.database()
+storage = firebase.storage()
 
-
-    # DenseNet Model
-    densenet_model = tf.keras.models.Sequential([
-        tf.keras.applications.densenet.DenseNet121(include_top=False, weights='imagenet',input_shape=(512, 512, 3)),
-    tf.keras.layers.GlobalAveragePooling2D(),
-    tf.keras.layers.Dense(4,activation='softmax')
-    ])
-
-    # Ensembling the Models
-    inputs = tf.keras.Input(shape=(512, 512, 3))
-
-    xception_output = xception_model(inputs)
-    densenet_output = densenet_model(inputs)
-
-    outputs = tf.keras.layers.average([densenet_output, xception_output])
-
-
-    model = tf.keras.Model(inputs=inputs, outputs=outputs)
-
-    # Loading the Weights of Model
-    model.load_weights(path)
-    
-    return model
-
-
-# Removing Menu
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
-
-# Title and Description
-st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQMSKUYWFZCOP2VQSI4YWPLUKA')
-st.write('Welcome to PlantBay!', 'Your Personal Plant Assistant!')
-
-# Loading the Model
-model = load_model('model_final.h5')
+def homepage():
+    # Importing Necessary Libraries
+    import streamlit as st
+    from PIL import Image
+    import io
+    import numpy as np
+    import tensorflow as tf
+    from utils import clean_image, get_prediction, make_results
+    #st.set_page_config(page_title='Plantbay', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/home-icon.png")
+    col1, col2 = st.columns([1,8])
+    with col1:
+        login_choice = st.button('Login') 
+    with col2:
+        signup_choice = st.button('Signup')
+        
+    if login_choice:
+        login()
+    elif signup_choice: 
+        signup()
+        
+    # Loading the Model and saving to cache
+    @st.cache(allow_output_mutation=True)
+    def load_model(path):
+        # Xception Model
+        xception_model = tf.keras.models.Sequential([
+        tf.keras.applications.xception.Xception(include_top=False, weights='imagenet', input_shape=(512, 512, 3)),
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.Dense(4,activation='softmax')
+        ])
 
 
-option = st.selectbox(
-     'How would you like to detect a disease?',
-     ('Camera', 'Upload an Image'))
-if option == 'Camera':
-    uploaded_file = st.camera_input("Take a picture")
+        # DenseNet Model
+        densenet_model = tf.keras.models.Sequential([
+            tf.keras.applications.densenet.DenseNet121(include_top=False, weights='imagenet',input_shape=(512, 512, 3)),
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.Dense(4,activation='softmax')
+        ])
+
+        # Ensembling the Models
+        inputs = tf.keras.Input(shape=(512, 512, 3))
+
+        xception_output = xception_model(inputs)
+        densenet_output = densenet_model(inputs)
+
+        outputs = tf.keras.layers.average([densenet_output, xception_output])
+
+
+        model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+        # Loading the Weights of Model
+        model.load_weights(path)
+        
+        return model
+
+
+    # Removing Menu
+    hide_streamlit_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+    # Title and Description
+    st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
+    st.write('Welcome to PlantBay!', 'Your Personal Plant Assistant!')
+
+    # Loading the Model
+    model = load_model('model_final.h5')
+
+
+    option = st.selectbox(
+        'How would you like to detect a disease?',
+        ('Camera', 'Upload an Image'))
+    if option == 'Camera':
+        uploaded_file = st.camera_input("Take a picture")
+        if uploaded_file != None:
+            st.success('File Upload Success!!')
+    elif option == 'Upload an Image':    
+        uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg"])
+
     if uploaded_file != None:
-        st.success('File Upload Success!!')
-elif option == 'Upload an Image':    
-    uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg"])
+        
+        # Display progress and text
+        progress = st.text("Crunching Image")
+        my_bar = st.progress(0)
+        i = 0
+        
+        # Reading the uploaded image
+        image = Image.open(io.BytesIO(uploaded_file.read()))
+        st.image(np.array(Image.fromarray(
+            np.array(image)).resize((700, 400), Image.ANTIALIAS)), width=None)
+        my_bar.progress(i + 40)
+        
+        # Cleaning the image
+        image = clean_image(image)
+        
+        # Making the predictions
+        predictions, predictions_arr = get_prediction(model, image)
+        my_bar.progress(i + 30)
+        
+        # Making the results
+        result = make_results(predictions, predictions_arr)
+        
+        # Removing progress bar and text after prediction done
+        my_bar.progress(i + 30)
+        progress.empty()
+        i = 0
+        my_bar.empty()
+        
+        # Show the results
+        st.subheader(f"The plant{result['status']} with {result['prediction']} probability.")
 
-if uploaded_file != None:
+def login():
+    import code
+    from email import message
+    import pyrebase
+    import streamlit as st
+    from datetime import datetime
+    from utils import firebaseConfig
+
+    #st.set_page_config(page_title='Login', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/login-icon.png")
+
+    # Removing Menu
+    hide_streamlit_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+    # Title and Description
+    st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
+    st.write('Login to access exciting features!')
+
+    # Obtain User Input for email and password
+    email = st.text_input('Please enter your email address')
+    password = st.text_input('Please enter your password',type = 'password')
     
-    # Display progress and text
-    progress = st.text("Crunching Image")
-    my_bar = st.progress(0)
-    i = 0
+    col1, col2 = st.columns([1,4])
+    with col1:
+        login_confirm = st.button('Click to Login')
+    with col2:
+        resetpwd = st.button('Reset Password')
+    if resetpwd:
+        resetpass()
+    if login_confirm:
+        auth.sign_in_with_email_and_password(email,password)
+        st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
+        #bio = st.radio('Jump to',['Home','Workplace Feeds', 'Settings'])
+        
+def signup():
+    #st.set_page_config(page_title='Login', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/signup-icon.png")
+
+    # Removing Menu
+    hide_streamlit_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+    # Title and Description
+    st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
+    st.write("We can't wait to have you on-board with us!")
     
-    # Reading the uploaded image
-    image = Image.open(io.BytesIO(uploaded_file.read()))
-    st.image(np.array(Image.fromarray(
-        np.array(image)).resize((700, 400), Image.ANTIALIAS)), width=None)
-    my_bar.progress(i + 40)
     
-    # Cleaning the image
-    image = clean_image(image)
-    
-    # Making the predictions
-    predictions, predictions_arr = get_prediction(model, image)
-    my_bar.progress(i + 30)
-    
-    # Making the results
-    result = make_results(predictions, predictions_arr)
-    
-    # Removing progress bar and text after prediction done
-    my_bar.progress(i + 30)
-    progress.empty()
-    i = 0
-    my_bar.empty()
-    
-    # Show the results
-    st.subheader(f"The plant{result['status']} with {result['prediction']} probability.")
-    
+    handle = st.sidebar.text_input(
+        'Please input your app handle name', value='Default')
+    submit = st.sidebar.button('Create my account')
+    email = st.text_input('Please enter your email address')
+    password = st.text_input('Please enter your password',type = 'password')
+
+    if submit:
+        auth.create_user_with_email_and_password(email, password)
+        st.success('Your account is created suceesfully!')
+        st.balloons()
+        # Sign in
+        user = auth.sign_in_with_email_and_password(email, password)
+        db.child(user['localId']).child("Handle").set(handle)
+        db.child(user['localId']).child("ID").set(user['localId'])
+        st.title('Welcome' + handle)
+        st.info('Login via login drop down selection')
+homepage()
+def resetpass():
+    st.text("test")
