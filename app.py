@@ -2,7 +2,17 @@ import streamlit as st
 import pyrebase
 import streamlit as st
 from datetime import datetime
-from utils import firebaseConfig
+# Configuration Key
+firebaseConfig = {
+    'apiKey': "AIzaSyDCfL9w3XTZuBXBMlkhB4TZXu_wvgmQ3-Q",
+    'authDomain': "plantbay-de191.firebaseapp.com",
+    'projectId': "plantbay-de191",
+    'databaseURL': "https://plantbay-de191-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    'storageBucket': "plantbay-de191",
+    'messagingSenderId': "953816647993",
+    'appId': "1:953816647993:web:50934aa5699e40d80180e8",
+    'measurementId': "G-Z24CHWP0WY"
+}
 # Firebase Authentication
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
