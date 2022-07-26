@@ -1,5 +1,5 @@
 # PLANTBAY - Computer Science IA
-<img src="https://raw.githubusercontent.com/tanujdargan/plantbay/main/plantbay.png?token=GHSAT0AAAAAABSBHTQNIGKE6GMYIA27JW7KYR7HLUQ" align="center"/>
+<img src="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png" align="center" height="80px"/>
 
 # Firebase Setup
 - Step 1: Create a new project
