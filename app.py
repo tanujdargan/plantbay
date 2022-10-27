@@ -1,7 +1,8 @@
-import streamlit as st
+# Modules
 import pyrebase
 import streamlit as st
 from datetime import datetime
+
 # Configuration Key
 firebaseConfig = {
     'apiKey': "AIzaSyDCfL9w3XTZuBXBMlkhB4TZXu_wvgmQ3-Q",
@@ -13,33 +14,32 @@ firebaseConfig = {
     'appId': "1:953816647993:web:50934aa5699e40d80180e8",
     'measurementId': "G-Z24CHWP0WY"
 }
+
 # Firebase Authentication
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
 
+st.set_page_config(page_title='Plantbay', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/home-icon.png")
+
 # Database
 db = firebase.database()
 storage = firebase.storage()
+from st_btn_select import st_btn_select
+# Obtain User Input for email and password
 
-def homepage():
-    # Importing Necessary Libraries
-    import streamlit as st
+
+page = st_btn_select(
+  # The different pages
+  ('Home','Login','Sign Up'))
+
+# Display the right things according to the page
+if page == 'Home':
+  # Importing Necessary Libraries
     from PIL import Image
     import io
     import numpy as np
     import tensorflow as tf
     from utils import clean_image, get_prediction, make_results
-    #st.set_page_config(page_title='Plantbay', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/home-icon.png")
-    col1, col2 = st.columns([1,8])
-    with col1:
-        login_choice = st.button('Login') 
-    with col2:
-        signup_choice = st.button('Signup')
-        
-    if login_choice:
-        login()
-    elif signup_choice: 
-        signup()
         
     # Loading the Model and saving to cache
     @st.cache(allow_output_mutation=True)
@@ -89,10 +89,6 @@ def homepage():
     st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
     st.write('Welcome to PlantBay!', 'Your Personal Plant Assistant!')
 
-    # Loading the Model
-    model = load_model('model_final.h5')
-
-
     option = st.selectbox(
         'How would you like to detect a disease?',
         ('Camera', 'Upload an Image'))
@@ -102,7 +98,10 @@ def homepage():
             st.success('File Upload Success!!')
     elif option == 'Upload an Image':    
         uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg"])
-
+    # Loading the Model
+    model = load_model('model_final.h5')
+    if model != None:
+        st.text("Keras Model Loaded")    
     if uploaded_file != None:
         
         # Display progress and text
@@ -133,80 +132,35 @@ def homepage():
         my_bar.empty()
         
         # Show the results
-        st.subheader(f"The plant{result['status']} with {result['prediction']} probability.")
-
-def login():
-    import code
-    from email import message
-    import pyrebase
-    import streamlit as st
-    from datetime import datetime
-
-
-    #st.set_page_config(page_title='Login', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/login-icon.png")
-
-    # Removing Menu
-    hide_streamlit_style = """
-                <style>
-                #MainMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                </style>
-                """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
-
-    # Title and Description
-    st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
-    st.write('Login to access exciting features!')
-
-    # Obtain User Input for email and password
-    email = st.text_input('Please enter your email address')
-    password = st.text_input('Please enter your password',type = 'password')
-    
-    col1, col2 = st.columns([1,4])
-    with col1:
-        login_confirm = st.button('Click to Login')
-    with col2:
-        resetpwd = st.button('Reset Password')
-    if resetpwd:
-        resetpass()
-    if login_confirm:
-        auth.sign_in_with_email_and_password(email,password)
-        st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
-        #bio = st.radio('Jump to',['Home','Workplace Feeds', 'Settings'])
+        st.subheader(f"The plant{result['status']} with a predcition probability of {result['prediction']}.")
         
-def signup():
-    #st.set_page_config(page_title='Login', page_icon="https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/signup-icon.png")
-
-    # Removing Menu
-    hide_streamlit_style = """
-                <style>
-                #MainMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                </style>
-                """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
-
-    # Title and Description
-    st.image('https://raw.githubusercontent.com/tanujdargan/plantbay/main/assets/plantbay.png?token=GHSAT0AAAAAABSBHTQM2WJJ5O7UQFBB2M5MYWPHMCQ')
-    st.write("We can't wait to have you on-board with us!")
-    
-    
-    handle = st.sidebar.text_input(
-        'Please input your app handle name', value='Default')
-    submit = st.sidebar.button('Create my account')
+elif page == 'Login':
+    st.write('Login')
     email = st.text_input('Please enter your email address')
     password = st.text_input('Please enter your password',type = 'password')
-
+    login = st.button('Login')
+    if login:
+        user = auth.sign_in_with_email_and_password(email,password)
+        st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
+        if login:
+            st.success('Logged in as {}'.format(user['email']))
+    st.button('Reset Password')
+    # To be implemented
+elif page == 'Sign Up':
+    st.write('Sign Up')
+    handle = st.text_input(
+        'Please input your app handle name', value='Default')
+    email = st.text_input('Please enter your email address')
+    password = st.text_input('Please enter your password',type = 'password')
+    submit = st.button('Create my account')
+    
     if submit:
-        auth.create_user_with_email_and_password(email, password)
-        st.success('Your account is created suceesfully!')
+        user = auth.create_user_with_email_and_password(email, password)
+        st.success('Your account has been created suceesfully!')
         st.balloons()
         # Sign in
         user = auth.sign_in_with_email_and_password(email, password)
         db.child(user['localId']).child("Handle").set(handle)
         db.child(user['localId']).child("ID").set(user['localId'])
-        st.title('Welcome' + handle)
-        st.info('Login via login drop down selection')
-homepage()
-def resetpass():
-    st.text("test")
+        st.title('Welcome to PlantBay! ' + handle)
+        st.info('Kindly use the buttons above to navigate to the login page')

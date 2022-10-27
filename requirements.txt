@@ -104,6 +104,7 @@ Send2Trash==1.8.0
 six==1.16.0
 smmap==5.0.0
 soupsieve==2.3.2.post1
+st-btn-select==0.1.2
 stack-data==0.3.0
 streamlit==1.11.1
 tenacity==8.0.1
