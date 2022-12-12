@@ -1,0 +1,1 @@
+start cmd.exe /k C:\Users\tanuj\Desktop\plantbay-final\pb-final\Scripts\activate 
