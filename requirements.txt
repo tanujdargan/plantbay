@@ -115,7 +115,6 @@ st-annotated-text==3.0.0
 st-btn-select==0.1.2
 streamlit==1.15.1
 streamlit-camera-input-live==0.2.0
-streamlit-cookies-manager==0.2.0
 streamlit-embedcode==0.1.2
 streamlit-extras==0.2.3
 streamlit-faker==0.0.2

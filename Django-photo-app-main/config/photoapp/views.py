@@ -1,16 +1,14 @@
 '''Photo app generic views'''
 
-from django.shortcuts import get_object_or_404
-
-from django.core.exceptions import PermissionDenied
-
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
 
 from .models import Photo
+
 
 class PhotoListView(ListView):
     
@@ -93,4 +91,23 @@ class PhotoDeleteView(UserIsSubmitter, DeleteView):
     model = Photo
 
     success_url = reverse_lazy('photo:list')
+
+from django.db.models import Q
+from django.shortcuts import render
+from photoapp.models import Photo
+
+from .models import Photo
+
+
+def search_view(request):
+    query = request.GET.get('q')
+    if query:
+        photos = Photo.objects.filter(title__icontains=query)
+    else:
+        photos = Photo.objects.all()
+    return render(request, 'photoapp/photo_list.html', {'photos': photos})
+
+
+
+
 

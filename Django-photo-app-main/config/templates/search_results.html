@@ -1,0 +1,8 @@
+<form method="get" action="{% url 'search' %}">
+    <input type="text" name="search_query" placeholder="Search for plants">
+    <input type="submit" value="Search">
+</form>
+
+{% for plant in plants %}
+    <p>{{ plant.name }}</p>
+{% endfor %}

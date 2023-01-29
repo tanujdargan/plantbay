@@ -18,6 +18,14 @@
     >
       <ul class="navbar-nav">
         {% if user.is_authenticated %}
+        <li class="nav-item">
+          <form action="{% url 'search' %}" method="get">
+            <div class="form-group">
+              {{ form.query }}
+              <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+          </form>          
+        </ul>
 
         <li class="nav-item">
           <a class="nav-link active" href="{% url 'photo:create' %}">Add a photo</a>
@@ -38,4 +46,5 @@
       </ul>
     </div>
   </div>
+  
 </nav>
