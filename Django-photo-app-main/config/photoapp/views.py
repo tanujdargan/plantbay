@@ -1,7 +1,5 @@
 '''Photo app generic views'''
 
-from decimal import Context
-
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
@@ -90,7 +88,7 @@ class PhotoDeleteView(UserIsSubmitter, DeleteView):
 
     model = Photo
 
-    success_url = reverse_lazy('photo:list')
+    success_url = reverse_lazy('photo:list')\
 
 from django.db.models import Q
 from django.shortcuts import render
@@ -99,23 +97,7 @@ from photoapp.models import Photo
 from .models import Photo
 
 
-def search_view(request):
-    print('search view is triggered')
+def search(request):
     query = request.GET.get('q')
-    if query:
-        photos = Photo.objects.filter(tags__name__icontains=query)
-        if not photos:
-            return render(request, 'photoapp/search_error.html', {'query': query})
-    else:
-        photos = Photo.objects.all()
-    return render(request, 'photoapp/search_results.html', {'photos': photos})
-
-
-from django.shortcuts import render
-
-
-
-
-
-
-
+    photos = Photo.objects.filter(tags__name__icontains=query)
+    return render(request, 'photoapp/search_results.html', {'photos': photos, 'q': query})

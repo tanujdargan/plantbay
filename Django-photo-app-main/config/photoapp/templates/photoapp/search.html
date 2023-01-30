@@ -1,12 +1,14 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
   <h1>Search Results</h1>
-  {% if tags %}
-    {% for tag in tags %}
-      <p>{{ tag }}</p>
-    {% endfor %}
+  {% if plants %}
+    <ul>
+      {% for plant in plants %}
+        <li>{{ plant.name }}</li>
+      {% endfor %}
+    </ul>
   {% else %}
-    <p>Tag does not exist.</p>
+    <p>No plants found.</p>
   {% endif %}
-{% endblock content %}
+{% endblock %}

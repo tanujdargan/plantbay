@@ -1,14 +1,20 @@
-{% extends 'photoapp/base.html' %}
+{% extends 'base.html' %} 
 
-{% block content %}
-  <h1>Search Results</h1>
+{% block body %}
+
+<div class="row">
+  <p>Viewing results for "{{ q }}"</p>
   {% if photos %}
-    <ul>
-      {% for photo in photos %}
-        <li><a href="{% url 'photo:detail' photo.id %}">{{ photo.title }}</a></li>
-      {% endfor %}
-    </ul>
+    {% for photo in photos %}
+    <div class="col-lg-3 col-md-4 col-xs-6">
+      <a href="{% url 'photo:detail' photo.id %}" class="d-block mb-4 h-100">
+        <img src="{{photo.image.url}}" class="img-fluid rounded" alt="{{photo.title}}" />
+      </a>
+    </div>
+    {% endfor %}
   {% else %}
-    <p>No results found</p>
+    <p>No photos found for the search query.</p>
   {% endif %}
-{% endblock %}
+</div>
+
+{% endblock body %}
