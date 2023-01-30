@@ -2,9 +2,9 @@
 
 from django.urls import path
 
-from . import views
 from .views import (PhotoCreateView, PhotoDeleteView, PhotoDetailView,
-                    PhotoListView, PhotoTagListView, PhotoUpdateView)
+                    PhotoListView, PhotoTagListView, PhotoUpdateView,
+                    search_view)
 
 app_name = 'photo'
 
@@ -21,5 +21,5 @@ urlpatterns = [
 
     path('photo/<int:pk>/delete/', PhotoDeleteView.as_view(), name='delete'),
     
-    path('search/', views.search_view, name='search'),
+    path('search/', search_view, name='search'),
 ]

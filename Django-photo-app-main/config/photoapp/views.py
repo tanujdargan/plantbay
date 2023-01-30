@@ -1,5 +1,7 @@
 '''Photo app generic views'''
 
+from decimal import Context
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
@@ -10,12 +12,9 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 from .models import Photo
 
 
-class PhotoListView(ListView):
-    
-    model = Photo     
-
+class PhotoListView(LoginRequiredMixin, ListView):
+    model = Photo
     template_name = 'photoapp/list.html'
-
     context_object_name = 'photos'
 
 
@@ -36,13 +35,14 @@ class PhotoTagListView(PhotoListView):
         return context
      
 
-class PhotoDetailView(DetailView):
-
+class PhotoDetailView(UserPassesTestMixin, DetailView):
     model = Photo
-
     template_name = 'photoapp/detail.html'
-
     context_object_name = 'photo'
+
+    def test_func(self):
+        photo = self.get_object()
+        return self.request.user == photo.submitter
 
 
 class PhotoCreateView(LoginRequiredMixin, CreateView):
@@ -100,12 +100,20 @@ from .models import Photo
 
 
 def search_view(request):
+    print('search view is triggered')
     query = request.GET.get('q')
     if query:
-        photos = Photo.objects.filter(title__icontains=query)
+        photos = Photo.objects.filter(tags__name__icontains=query)
+        if not photos:
+            return render(request, 'photoapp/search_error.html', {'query': query})
     else:
         photos = Photo.objects.all()
-    return render(request, 'photoapp/photo_list.html', {'photos': photos})
+    return render(request, 'photoapp/search_results.html', {'photos': photos})
+
+
+from django.shortcuts import render
+
+
 
 
 

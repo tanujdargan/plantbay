@@ -1,9 +1,14 @@
-<form method="get">
-    {{ form.as_p }}
-    <input type="submit" value="Search">
-</form>
-<ul>
-{% for result in results %}
-    <li>{{ result.name }}</li>
-{% endfor %}
-</ul>
+{% extends 'photoapp/base.html' %}
+
+{% block content %}
+  <h1>Search Results</h1>
+  {% if photos %}
+    <ul>
+      {% for photo in photos %}
+        <li><a href="{% url 'photo:detail' photo.id %}">{{ photo.title }}</a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No results found</p>
+  {% endif %}
+{% endblock %}

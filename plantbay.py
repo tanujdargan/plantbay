@@ -13,8 +13,8 @@ from utils import clean_image, get_prediction, make_results
 
 menu_choice = option_menu(
             menu_title=None,  
-            options=["Home", "Login/Logout", "Gallery"],  
-            icons=["house", "box-arrow-in-right", "images"],  
+            options=["Home", "Login", "Gallery", "FAQ", "Feedback"],  
+            icons=["house", "box-arrow-in-right", "images", "question-circle", "envelope"],  
             menu_icon="cast",  
             default_index=0,  
             orientation="horizontal",
@@ -154,7 +154,7 @@ if menu_choice == "Home":
         elif int(predictions_arr) == 1:
             report_text3 = "Your plant is infected with various diseases. Contact an expert for further assistance and to prevent further damage."
         elif int(predictions_arr) == 2:
-            report_text3 = "Your plant has a disease called rust. The following remedies can be used to treat this disease:"
+            report_text3 = "Your plant has a disease called rust."
             report_text4 = 'The following remedies can be used to treat this disease:'
             remedy = True
         elif int(predictions_arr) == 3:
@@ -210,3 +210,51 @@ if menu_choice == "Home":
 if menu_choice=="Login/Logout":
     import webbrowser
     webbrowser.open_new_tab('http://127.0.0.1:8000/users/login/')
+
+if menu_choice=="FAQ":
+    st.write("Q. What is PlantBay?")
+    st.write("A. PlantBay is a web application that helps you identify the disease in your plant and provides you with the remedies to treat it.")
+    st.write("Q. How does it work?")
+    st.write("A. You can upload an image of your plant and the application will identify the disease in your plant and provide you with the remedies to treat it.")
+    st.write("Q. How do I use it?")
+    st.write("A. You can use it by clicking on the 'Upload Image' option in the sidebar and uploading an image of your plant.")
+    st.write("Q. How do I get the report?")
+    st.write("A. You can get the report by clicking on the 'Export Report' button after the prediction is done.")
+    st.write("Q. How do I login?")
+    st.write("A. You can login by clicking on the 'Login/Logout' option in the sidebar and entering your credentials.")
+    st.write("Q. How do I register?")
+    st.write("A. You can register by clicking on the 'Login/Logout' option in the sidebar and entering your credentials.")
+    st.write("Q. What devices are supprted?")
+    st.write("A. PlantBay is supported on all devices with a web browser.")
+    st.write("Q. What is the cost of using PlantBay?")
+    st.write("A. PlantBay is free to use.")
+    st.write("Q. Do i have to create an account to use it?")    
+    st.write("A. No, you don't have to create an account to use it.")
+    st.write("Q. Where is my data stored and can I delete it?")
+    st.write("A. Your data is stored on our servers and you can delete it by selecting any image and clicking the delete button. Reports are not saved on our servers.")
+    st.write("Q. How do i search for my images?")
+    st.write("A. You can search for your images by clicking on the 'Search' option in the sidebar and entering the name of the image.")
+    
+if menu_choice=="Feedback":
+    st.header(":mailbox: Get In Touch With Me!")
+
+
+    contact_form = """
+    <form action="https://formsubmit.co/dargantanuj@gmail.com" method="POST">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="email" name="email" placeholder="Your email" required>
+        <textarea name="message" placeholder="Your message here"></textarea>
+        <button type="submit">Send</button>
+    </form>
+    """
+
+    st.markdown(contact_form, unsafe_allow_html=True)
+
+    # Use Local CSS File
+    def local_css(file_name):
+        with open(file_name) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+    local_css("style.css")

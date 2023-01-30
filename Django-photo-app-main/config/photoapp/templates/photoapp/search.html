@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Search Results</h1>
+  {% if tags %}
+    {% for tag in tags %}
+      <p>{{ tag }}</p>
+    {% endfor %}
+  {% else %}
+    <p>Tag does not exist.</p>
+  {% endif %}
+{% endblock content %}
