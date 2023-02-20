@@ -21,3 +21,10 @@ class Photo(models.Model):
 
     def __str__(self):
         return self.title
+    
+class Image(models.Model):
+    file = models.ImageField(upload_to='images/')
+    stored = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.file.name

@@ -1,3 +1,7 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.analysis.extraPaths": [
+        "./Django-photo-app-main/config",
+        "./Django-photo-app-main/config"
+    ]
 }

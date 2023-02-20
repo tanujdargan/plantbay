@@ -1,17 +1,12 @@
 import io
 import os
-import sys
 from pathlib import Path
-from urllib.parse import urljoin
 
-import django
 import numpy as np
-import requests
 import streamlit as st
 import tensorflow as tf
 from PIL import Image
 from streamlit_option_menu import option_menu
-
 from utils import clean_image, get_prediction, make_results
 
 MEDIA_URL = '/media'
@@ -65,7 +60,6 @@ if menu_choice == "Home":
                     
                     return model
 
-
         # Removing Menu
     hide_streamlit_style = """
                 <style>
@@ -88,10 +82,10 @@ if menu_choice == "Home":
         if uploaded_file != None:
             st.success('File Upload Success!!')
     elif option == 'Upload an Image':    
-        uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg"])
+        uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg","webp"])
         store_file = st.checkbox('Store the file')
     # Loading the Model
-    model = load_model('model_final.h5')
+    model = load_model('C:/Users/tanuj/Desktop/plantbay-final/model_final.h5')
     if model != None:
         st.text("Keras Model Loaded")    
     if uploaded_file != None:
@@ -100,7 +94,6 @@ if menu_choice == "Home":
         progress = st.text("Crunching Image")
         my_bar = st.progress(0)
         i = 0
-        
 
         image = Image.open(io.BytesIO(uploaded_file.read()))
         st.image(np.array(Image.fromarray(
@@ -165,19 +158,39 @@ if menu_choice == "Home":
                 w.write(uploaded_file.getvalue())
 
             if save_path.exists():
-                st.success(f'File {uploaded_file.name} is successfully saved!')
+                st.success(f'File {uploaded_file.name} was successfully saved!')
             stored_path = "C:/Users/tanuj/Desktop/PlantBay-final/Django-photo-app-main/config/media/photo/" + uploaded_file.name
-            
             if store_file is not None:
-                file_name = uploaded_file.name
-                image_url = 'http://localhost:6400/' + file_name
-                image_url = urljoin(MEDIA_URL, image_url)
-                #image_url = urljoin(MEDIA_URL, 'photo/' + uploaded_file.name)
-                #image_url = 'Django-photo-app-main/config/media/photo/' + uploaded_file.name
-                response = requests.get(image_url)
-                image = response.content
-                if image:
-                    st.success("Image added to database")    
+                import django
+                from django.contrib.auth import get_user_model
+
+                # set up environment variables
+                os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+                django.setup()
+
+                # import models from Django app
+                from photoapp.models import Photo
+
+                # get a user instance to use as the submitter, user values are globally stored
+                User = get_user_model()
+                if User == None:
+                    st.error("Please login to store files")
+                else:
+                    user = User.objects.first()  # replace with a valid user instance
+                    st.write("File saved under user: " + user.username)
+
+                    # create a new Photo object with submitter set to user
+                    photo = Photo(title=result['status'], description=report_text1+report_text2+report_text3, image=stored_path, submitter=user)
+
+                    # save the object to the database
+                    photo.save()
+
+                    # add tags to the object
+                    photo.tags.add(result['status'], result['prediction'])
+
+                    # print the object's ID
+                    st.write("File saved with ID: " + str(photo.id))
+
             
         import base64
 
@@ -274,5 +287,4 @@ if menu_choice=="Feedback":
 
 
     local_css("style.css")
-    
-    # Reading the uploaded image
+  

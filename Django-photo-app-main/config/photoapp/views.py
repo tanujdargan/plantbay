@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
+from photoapp.models import Photo
 
 from .models import Photo
 
