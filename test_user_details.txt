@@ -1,5 +1,0 @@
-username: testuser1
-password: pwd_test1
-
-username: testuser2
-password: pwd_test2
