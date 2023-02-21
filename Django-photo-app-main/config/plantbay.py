@@ -82,12 +82,21 @@ if menu_choice == "Home":
         if uploaded_file != None:
             st.success('File Upload Success!!')
     elif option == 'Upload an Image':    
-        uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg","webp"])
-        store_file = st.checkbox('Store the file')
+        try:
+            uploaded_file = st.file_uploader("Choose a Image file", type=["png", "jpg","jpeg","webp"])
+            store_file = st.checkbox('Store the file')
+            if uploaded_file != None:
+                st.success('File Upload Success!!')
+        except Exception as e:
+            st.error("Error uploading file: {}".format(str(e)))
     # Loading the Model
-    model = load_model('C:/Users/tanuj/Desktop/plantbay-final/model_final.h5')
-    if model != None:
-        st.text("Keras Model Loaded")    
+    try:
+        model = load_model('C:/Users/tanuj/Desktop/plantbay-final/model_final.h5')
+        if model != None:
+            st.text("Keras Model Loaded")
+    except Exception as e:
+        st.error("Error loading model: {}".format(str(e)))
+ 
     if uploaded_file != None:
         
         # Display progress and text
@@ -173,10 +182,12 @@ if menu_choice == "Home":
 
                 # get a user instance to use as the submitter, user values are globally stored
                 User = get_user_model()
-                if User == None:
+
+                try:
+                    user = User.objects.first()
+                except User.DoesNotExist:
                     st.error("Please login to store files")
                 else:
-                    user = User.objects.first()  # replace with a valid user instance
                     st.write("File saved under user: " + user.username)
 
                     # create a new Photo object with submitter set to user
@@ -190,7 +201,6 @@ if menu_choice == "Home":
 
                     # print the object's ID
                     st.write("File saved with ID: " + str(photo.id))
-
             
         import base64
 
